@@ -29,6 +29,33 @@ async function getReport () {
     return await utils.sendGetReportRequestAsync(requestParams.url, requestParams.options);
 }
 
+async function GetTablesInGroup () {
+    // validate configuration info
+    res = utils.validateConfig();
+    if(res){
+       console.log("error: "  + res);
+       return;
+    }
+
+    // get aad token to use for sending api requests
+    tokenResponse = await auth.getAuthenticationToken();
+    if(('' + tokenResponse).indexOf('Error') > -1){
+        console.log('' + tokenResponse);
+        return;
+    }
+    
+    var token = tokenResponse.accessToken;
+    console.log("Returned accessToken: " + token);
+
+    // create reqest for GetReport api call
+    var requestParams = utils.createGetTablesInGroupParams(token)
+
+    // get the requested report from the requested api workspace.
+    // if report not specified - returns the first report in the workspace.
+    // the request's results will be printed to console.
+    return await utils.sendGetTablesInGroupAsync(requestParams.url, requestParams.options);
+}
+
 async function generateEmbedToken(){
     // validate configuration info
     res = utils.validateConfig();
@@ -143,3 +170,6 @@ async function generateEmbedTokenWithRls(username, roles){
     // the returned token will be printed to console.
     return await utils.sendGenerateEmbedTokenRequestAsync(url, options);
 }
+
+//var t = getReport();
+var t1 = GetTablesInGroup();

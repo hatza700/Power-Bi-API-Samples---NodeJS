@@ -1,0 +1,25 @@
+{
+  "name": "Power-Bi-API-Samples---NodeJS",
+  "version": "1.0.0",
+  "description": "Contains several API calls samples for App Owns Data.",
+  "main": "authentication.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hatza700/Power-Bi-API-Samples---NodeJS.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hatza700/Power-Bi-API-Samples---NodeJS/issues"
+  },
+  "homepage": "https://github.com/hatza700/Power-Bi-API-Samples---NodeJS#readme",
+  "dependencies": {
+    "adal-node": "^0.1.28",
+    "guid": "0.0.12",
+    "request": "^2.88.0"
+  }
+}
