@@ -74,6 +74,45 @@ function createGetTablesInGroupParams(accessToken){
     };
 }
 
+function createPostDatasetInGroupParams(accessToken, body){
+    var authHeader = getAuthHeader(accessToken);
+    var headers = {
+        'Authorization': authHeader,       
+    };
+
+    var options = {
+            headers: headers,
+            method: 'POST',
+			body: body
+    };
+	//https://api.powerbi.com/v1.0/myorg/groups/{groupId}/datasets
+    var url = config.apiUrl + 'v1.0/myorg/groups/' + config.workspaceId + '/datasets';
+
+    return {
+        'url': url,
+        'options': options
+    };
+}
+
+function createGeneralParams(url, method, accessToken, body){
+    var authHeader = getAuthHeader(accessToken);
+    var headers = {
+        'Authorization': authHeader,
+		'Content-Type': 'application/json'
+    };
+
+    var options = {
+            headers: headers,
+            method: method,
+			body: body
+    };    
+
+    return {
+        'url': url,
+        'options': options
+    };
+}
+
 async function sendGetReportRequestAsync(url, options){
     let promise = () => { return new Promise(
         (resolve, reject) => {
@@ -147,6 +186,67 @@ async function sendGetTablesInGroupAsync(url, options){
                             resolve(getReportRes.value[0]); 
                         }
                     }
+                } catch(e){}
+            });
+        });
+    }
+
+    var res;
+    await promise().then(
+        reportResponse => res = reportResponse
+    ).catch(
+        err => res = err 
+    );
+    return res;
+}
+
+async function sendPostDatasetInGroupAsync(url, options){
+    let promise = () => { return new Promise(
+        (resolve, reject) => {
+			console.log("Start");
+            request(url, options,function (error, response, body){
+                console.log("-----Get Dataset Results-----");
+                console.log('Request STATUS: ' + response.statusCode);
+                if(error){
+                    reject(error);
+                }
+                if(body == ""){
+                    console.log('error: no dataset created' + " in group with id: " + config.workspaceId);
+                    reject('error: no dataset created' + " in group with id: " + config.workspaceId);
+                }
+                try{
+                    getReportRes = JSON.parse(body)
+					console.log(getReportRes);
+					resolve(getReportRes);
+                } catch(e){}
+            });
+			console.log("End");
+        });
+    }
+
+    var res;
+    await promise().then(
+        reportResponse => res = reportResponse
+    ).catch(
+        err => res = err 
+    );
+    return res;
+}
+
+async function sendGeneralAsync(url, options){
+    let promise = () => { return new Promise(
+        (resolve, reject) => {
+            request(url, options,function (error, response, body){
+                console.log("-----Get Dataset Results-----");
+                console.log('Request STATUS: ' + response.statusCode);
+				console.log(body);
+                if(error){
+                    reject(error);
+                }
+				console.log(body);
+                try{
+                    getReportRes = JSON.parse(body)
+					console.log(getReportRes);
                 } catch(e){}
             });
         });
@@ -241,8 +341,12 @@ module.exports = {
     validateConfig : validateConfig,
     createGetReportRequestParams : createGetReportRequestParams,
 	createGetTablesInGroupParams : createGetTablesInGroupParams,
+	createPostDatasetInGroupParams: createPostDatasetInGroupParams,
     sendGetReportRequestAsync : sendGetReportRequestAsync,
 	sendGetTablesInGroupAsync : sendGetTablesInGroupAsync,
     sendGenerateEmbedTokenRequestAsync : sendGenerateEmbedTokenRequestAsync,
     sendGetDatasetRequestAsync : sendGetDatasetRequestAsync,
+	sendPostDatasetInGroupAsync: sendPostDatasetInGroupAsync,
+	createGeneralParams : createGeneralParams,
+	sendGeneralAsync : sendGeneralAsync
 }

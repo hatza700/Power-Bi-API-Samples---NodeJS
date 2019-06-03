@@ -56,6 +56,62 @@ async function GetTablesInGroup () {
     return await utils.sendGetTablesInGroupAsync(requestParams.url, requestParams.options);
 }
 
+async function PostDatasetInGroup (body) {
+    // validate configuration info
+    res = utils.validateConfig();
+    if(res){
+       console.log("error: "  + res);
+       return;
+    }
+
+    // get aad token to use for sending api requests
+    tokenResponse = await auth.getAuthenticationToken();
+    if(('' + tokenResponse).indexOf('Error') > -1){
+        console.log('' + tokenResponse);
+        return;
+    }
+    
+    var token = tokenResponse.accessToken;
+    console.log("Returned accessToken: " + token);
+
+
+    // create reqest for GetReport api call
+    var requestParams = utils.createPostDatasetInGroupParams(token, body)
+
+    // get the requested report from the requested api workspace.
+    // if report not specified - returns the first report in the workspace.
+    // the request's results will be printed to console.
+    return await utils.sendPostDatasetInGroupAsync(requestParams.url, requestParams.options);
+}
+
+async function PostGeneral (url, method, body) {
+    // validate configuration info
+    res = utils.validateConfig();
+    if(res){
+       console.log("error: "  + res);
+       return;
+    }
+
+    // get aad token to use for sending api requests
+    tokenResponse = await auth.getAuthenticationToken();
+    if(('' + tokenResponse).indexOf('Error') > -1){
+        console.log('' + tokenResponse);
+        return;
+    }
+    
+    var token = tokenResponse.accessToken;
+    console.log("Returned accessToken: " + token);
+
+
+    // create reqest for GetReport api call
+    var requestParams = utils.createGeneralParams(url, method, token, body)
+
+    // get the requested report from the requested api workspace.
+    // if report not specified - returns the first report in the workspace.
+    // the request's results will be printed to console.
+    return await utils.sendGeneralAsync(requestParams.url, requestParams.options);
+}
+
 async function generateEmbedToken(){
     // validate configuration info
     res = utils.validateConfig();
@@ -172,4 +228,122 @@ async function generateEmbedTokenWithRls(username, roles){
 }
 
 //var t = getReport();
-var t1 = GetTablesInGroup();
+
+	var body = `{
+  "name": "SalesMarketing2",
+  "defaultMode": "Push",
+  "tables": [
+    {
+      "name": "Product",
+      "columns": [
+        {
+          "name": "ProductID",
+          "dataType": "Int64"
+        },
+        {
+          "name": "Name",
+          "dataType": "string"
+        },
+        {
+          "name": "Category",
+          "dataType": "string"
+        },
+        {
+          "name": "IsCompete",
+          "dataType": "bool"
+        },
+        {
+          "name": "ManufacturedOn",
+          "dataType": "DateTime"
+        }
+      ],
+	  "measures": [
+		{
+			"expression": 'COUNTROWS(FILTER(Product, [IsCompete] = True))',
+			"name": "NumCompleted"
+		}
+		]
+    },
+	{
+	  "name": "NewProduct",
+	  "columns": [
+		{
+		  "name": "ProductID",
+		  "dataType": "Int64"
+		},
+		{
+		  "name": "Name",
+		  "dataType": "string"
+		},
+		{
+		  "name": "Category",
+		  "dataType": "string"
+		},
+		{
+		  "name": "IsCompete",
+		  "dataType": "bool"
+		},
+		{
+		  "name": "ManufacturedOn",
+		  "dataType": "DateTime"
+		},
+		{
+		  "name": "NewColumn",
+		  "dataType": "string"
+		}
+	  ]
+	}
+  ]
+}`;
+
+/*
+  "relationships": [
+		{
+	  "crossFilteringBehavior":"BothDirections",
+	  "fromTable":"Product",
+	  "fromColumn":"ProductID",
+	  "toTable":"NewProduct",
+	  "toColumn":"ProductID",
+	  "name":"ProductNewProduct"
+	  }
+	] */
+
+PostDatasetInGroup(body).then(function(result) {
+	console.log("PostGeneral");
+	console.log(result);
+	var rows = `{
+		  "rows": [
+			{
+			  "ProductID": 1,
+			  "Name": "Adjustable Race",
+			  "Category": "Components",
+			  "IsCompete": false,
+			  "ManufacturedOn": "07/30/2014"
+			},
+			{
+			  "ProductID": 2,
+			  "Name": "LL Crankarm",
+			  "Category": "Components",
+			  "IsCompete": true,
+			  "ManufacturedOn": "07/30/2014"
+			},
+			{
+			  "ProductID": 3,
+			  "Name": "HL Mountain Frame - Silver",
+			  "Category": "Bikes",
+			  "IsCompete": true,
+			  "ManufacturedOn": "07/30/2014"
+			}
+		  ]
+		}`;
+
+	var tblName = "Product";  
+	var url = config.apiUrl + 'v1.0/myorg/groups/' + config.workspaceId + '/datasets/' + result.id + '/tables/'+tblName+'/rows';
+
+	var t3 = PostGeneral(url, 'POST', rows);
+
+//url = config.apiUrl + 'v1.0/myorg/groups/' + config.workspaceId + '/datasets/' + config.datasetId + '/tables/'+tblName;
+
+//var t4 = PostGeneral(url, 'PUT', measures);
+});
+
